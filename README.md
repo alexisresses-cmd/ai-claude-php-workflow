@@ -1,6 +1,6 @@
-# claude-php-dev
+# AI Claude PHP Workflow
 
-> Configuration Claude Code for PHP developers — clean code, SOLID principles, two-mode workflow.
+> Claude Code configuration for PHP developers — clean code, SOLID principles, two-mode workflow.
 
 A ready-to-use [Claude Code](https://claude.ai/code) configuration designed for PHP development.
 It provides a structured skill suite covering the full development cycle, from ticket analysis to pull request submission.
@@ -46,8 +46,8 @@ Context 4: /challenge-review         →  Review findings challenged
 ### Quick install (Linux / WSL / macOS)
 
 ```bash
-git clone https://github.com/your-username/claude-php-dev.git
-cd claude-php-dev
+git clone https://github.com/your-username/ai-claude-php-workflow.git
+cd ai-claude-php-workflow
 chmod +x install.sh
 ./install.sh
 ```

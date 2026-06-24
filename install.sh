@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# claude-php-dev — Installation script
+# ai-claude-php-workflow — Installation script
 # Non-destructive: skips files that already exist unless --force is passed.
 # Merges settings.json intelligently (adds permissions, doesn't replace).
 # =============================================================================
@@ -53,7 +53,7 @@ EOF
 print_header() {
   echo ""
   echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-  echo -e "${BOLD}${BLUE}  claude-php-dev — Installer${NC}"
+  echo -e "${BOLD}${BLUE}  ai-claude-php-workflow — Installer${NC}"
   echo -e "${BOLD}${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
   echo ""
 }
