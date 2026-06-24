@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [],
+    "deny": [
+      "Bash(rm:-rf*)",
+      "Bash(rm:-f*)",
+      "Bash(git:push --force*)"
+    ]
+  },
+  "skipWorkflowUsageWarning": true,
+  "theme": "dark",
+  "effortLevel": "medium"
+}

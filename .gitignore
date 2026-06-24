@@ -1,0 +1,9 @@
+# Claude Code internal files — not part of the shareable config
+.claude/
+
+# Backup files created by install.sh
+*.bak
+
+# OS
+.DS_Store
+Thumbs.db
