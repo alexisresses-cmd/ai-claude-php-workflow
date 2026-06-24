@@ -139,18 +139,43 @@ Ajoute la section Plan au fichier `analysis/{YYYYMMDD}-{slug}.md` en remplaçant
 > **Fichier prêt** : `analysis/{chemin-vers-ce-fichier}`
 ```
 
-Affiche le message de handoff avec le choix du mode :
+Avant d'afficher le message de handoff, **détermine le mode recommandé** en appliquant cette grille :
+
+| Signal | Poids |
+|---|---|
+| Complexité globale = Complexe | → Orchestre |
+| Risque sécurité 🔴 détecté dans l'analyse | → Orchestre |
+| Risque sécurité 🟠 détecté dans l'analyse | → Orchestre |
+| Code partagé impacté (lib commune, interface publique) | → Orchestre |
+| Plus de 5 fichiers modifiés | → Orchestre |
+| Complexité = Simple ET aucun risque sécurité | → dev-cycle |
+| Complexité = Moyenne ET aucun risque sécurité élevé | → dev-cycle |
+| Complexité = Moyenne ET risque sécurité 🟡 ou moins | → Séquentiel |
+
+**Règle de décision** :
+- Au moins un signal "Orchestre" → recommander **Orchestre**
+- Aucun signal Orchestre + complexité Simple ou Moyenne + sécurité faible → recommander **dev-cycle**
+- Cas intermédiaire → recommander **Séquentiel**
+
+Affiche le message de handoff avec la recommandation mise en avant :
 
 ```
 ✅ Plan approuvé. Fichier complété : analysis/{slug}.md
    Branche   : {nom-de-branche}
    PR draft  : {url}
 
-Choisis ton mode d'exécution :
+Mode recommandé : ⭐ {MODE RECOMMANDÉ}
+Raison          : {justification courte — ex: "complexité Simple, aucun risque sécurité"}
+
+┌─ ⭐ dev-cycle (recommandé si applicable) ───────────────┐  ← ou sans ⭐ si non recommandé
+│  Automatisé : implement → test → review en boucle.     │
+│  Correction auto des bloquants (max 2x) → PR livrée.   │
+│                                                        │
+│  /dev-cycle analysis/{slug}.md                         │
+└────────────────────────────────────────────────────────┘
 
 ┌─ MODE SÉQUENTIEL ──────────────────────────────────────┐
-│  Tout dans un seul contexte, étape par étape.          │
-│  Adapté si le ticket est simple ou bien cerné.         │
+│  Contrôle manuel étape par étape, même contexte.       │
 │                                                        │
 │  /dev-implement analysis/{slug}.md                     │
 │  /dev-test                                             │
@@ -159,10 +184,7 @@ Choisis ton mode d'exécution :
 └────────────────────────────────────────────────────────┘
 
 ┌─ MODE ORCHESTRE ───────────────────────────────────────┐
-│  Un contexte dédié par phase, contexte propre à        │
-│  chaque étape. Adapté si le ticket est complexe,       │
-│  touche des zones sensibles, ou si tu veux une review  │
-│  et un challenge sans biais du contexte précédent.     │
+│  Contexte dédié par phase, regard neuf à chaque étape. │
 │                                                        │
 │  Context 2 → /dev-implement analysis/{slug}.md         │
 │  Context 3 → /dev-review                               │
