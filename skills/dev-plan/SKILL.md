@@ -136,16 +136,37 @@ Ajoute la section Plan au fichier `analysis/{YYYYMMDD}-{slug}.md` en remplaçant
 
 ---
 
-> **Handoff Context 2** : Lance `/dev-implement {chemin-vers-ce-fichier}` dans un nouveau contexte.
+> **Fichier prêt** : `analysis/{chemin-vers-ce-fichier}`
 ```
 
-Affiche le message de handoff :
+Affiche le message de handoff avec le choix du mode :
 
 ```
 ✅ Plan approuvé. Fichier complété : analysis/{slug}.md
    Branche   : {nom-de-branche}
    PR draft  : {url}
 
-➡️  Dans un nouveau contexte Claude Code :
-    /dev-implement analysis/{slug}.md
+Choisis ton mode d'exécution :
+
+┌─ MODE SÉQUENTIEL ──────────────────────────────────────┐
+│  Tout dans un seul contexte, étape par étape.          │
+│  Adapté si le ticket est simple ou bien cerné.         │
+│                                                        │
+│  /dev-implement analysis/{slug}.md                     │
+│  /dev-test                                             │
+│  /dev-review                                           │
+│  /dev-pr                                               │
+└────────────────────────────────────────────────────────┘
+
+┌─ MODE ORCHESTRE ───────────────────────────────────────┐
+│  Un contexte dédié par phase, contexte propre à        │
+│  chaque étape. Adapté si le ticket est complexe,       │
+│  touche des zones sensibles, ou si tu veux une review  │
+│  et un challenge sans biais du contexte précédent.     │
+│                                                        │
+│  Context 2 → /dev-implement analysis/{slug}.md         │
+│  Context 3 → /dev-review                               │
+│  Context 4 → /challenge-review                         │
+│           → /dev-pr                                    │
+└────────────────────────────────────────────────────────┘
 ```

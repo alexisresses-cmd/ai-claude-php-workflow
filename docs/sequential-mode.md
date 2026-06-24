@@ -1,84 +1,79 @@
 # Mode Séquentiel — Guide d'utilisation
 
-Le mode séquentiel est le workflow pas-à-pas pour les tickets simples à moyens.
-Un seul contexte Claude, chaque skill s'enchaîne sur le précédent.
+L'analyse (`/dev-analyse` + `/dev-plan`) est **toujours la première étape**, quel que soit le mode.
+Le choix du mode se fait **après** l'analyse, au moment de lancer l'implémentation.
 
 ---
 
 ## Flux complet
 
 ```
-/dev-plan {contexte ou ticket}
-    → Découpage en tâches
-    → Approbation → branche + draft PR
+┌─────────────────────────────────────────────────────────────────────┐
+│  PHASE 1 — Analyse & Plan (toujours, dans les deux modes)           │
+│                                                                     │
+│  /dev-analyse {ticket}                                              │
+│    ├── Agent 🎯 Business    ─┐                                      │
+│    ├── Agent 🔍 Code        ─┼── (parallèle)                       │
+│    ├── Agent 🏗️ Architecture ─┤                                      │
+│    └── Agent 🔒 Sécurité   ─┘                                      │
+│                                                                     │
+│  /dev-plan                                                          │
+│    → Découpage en tâches, approbation                               │
+│    → Branche créée + draft PR                                       │
+│    → 📄 analysis/YYYYMMDD-{slug}.md complété                       │
+│    → ⬇️  Choix du mode d'exécution                                  │
+└─────────────────────────────────────────────────────────────────────┘
+```
 
-/dev-implement
-    → Implémentation tâche par tâche
-    → Commits intermédiaires
+En mode **séquentiel**, toutes les phases suivantes s'enchaînent dans le **même contexte** :
 
-/dev-test
-    → Scripts PHP + plan manuel
-
-/dev-review
-    → Revue multi-agents (qualité, bugs, sécurité)
-
-/dev-pr
-    → Finalisation + ready for review
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  MÊME CONTEXTE — Implémentation → Test → Review → PR               │
+│                                                                     │
+│  /dev-implement analysis/{slug}.md                                  │
+│  /dev-test                                                          │
+│  /dev-review                                                        │
+│  /dev-pr                                                            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
 ## Différences avec le mode orchestre
 
-| Mode orchestre | Mode séquentiel |
-|----------------|-----------------|
-| 4 contextes séparés | 1 seul contexte |
-| Analyse multi-agents (4 agents) | Plan direct |
-| Review multi-agents | Review multi-agents |
-| Challenge séparé dans Context 4 | Challenge optionnel dans le même contexte |
-| Fichier `analysis/` généré | Pas de fichier handoff |
-| Pour tickets complexes | Pour tickets simples à moyens |
+| | Séquentiel | Orchestre |
+|---|---|---|
+| **Analyse** | Identique — 4 agents en parallèle | Identique — 4 agents en parallèle |
+| **Contextes** | 1 seul après l'analyse | 1 par phase (implement / review / challenge) |
+| **Review** | 3 agents, même contexte que l'implémentation | 3 agents, contexte propre |
+| **Challenge** | Optionnel, même contexte | Contexte dédié, regard neuf |
+| **Quand** | Ticket simple ou bien cerné | Ticket complexe ou risqué |
 
 ---
 
-## Quand utiliser le mode séquentiel ?
+## Quand choisir le mode séquentiel ?
 
-✅ **Adapté pour :**
-- Bugs isolés avec cause claire
-- Petites features sur des zones connues
-- Tâches techniques simples (migration de config, ajout d'un champ, etc.)
-- Quand on connaît déjà les fichiers à toucher
+- Bug isolé avec cause claire
+- Feature sur 1-3 fichiers que tu connais bien
+- Ticket estimé Simple ou Moyenne par `/dev-plan`
+- Tu préfères itérer rapidement sans changer de contexte
 
 ---
 
-## Commandes rapides
+## Commandes
 
 ```bash
-# Dans un seul contexte
-/dev-plan {description ou numéro de ticket}
-/dev-implement
+# Phase 1 — toujours
+/dev-analyse {ticket-url-ou-texte}
+/dev-plan
+
+# Phase 2 — dans le même contexte
+/dev-implement analysis/{slug}.md
 /dev-test
 /dev-review
 /dev-pr
 
-# Si besoin de challenger la review
-/challenge-review
-```
-
----
-
-## Outils complémentaires
-
-```bash
-# Créer une branche manuellement (si /dev-plan ne l'a pas fait)
-/dev-branch {numéro-du-ticket}
-
-# Préparer un commit propre
-/dev-commit
-
-# Traiter les retours de review
-/review-return {url-ou-numéro-pr}
-
-# Challenger les retours d'une review
+# Si tu veux quand même challenger la review
 /challenge-review
 ```

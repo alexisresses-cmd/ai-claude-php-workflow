@@ -1,20 +1,7 @@
 # Mode Orchestre — Guide d'utilisation
 
-Le mode orchestre est conçu pour les tickets nécessitant une analyse approfondie avant de coder.
-Il utilise plusieurs agents Claude en parallèle et sépare le travail en **4 contextes distincts**,
-chacun avec un rôle précis.
-
----
-
-## Pourquoi des contextes séparés ?
-
-Chaque contexte Claude a une fenêtre de contexte limitée et un rôle différent :
-- **Context 1** (analyse + plan) : exploite la base de code pour comprendre
-- **Context 2** (implémentation) : contexte propre, focalisé uniquement sur le code à écrire
-- **Context 3** (review) : contexte propre, lit le diff avec un œil neuf
-- **Context 4** (challenge) : contexte propre, challenge la review sans biais
-
-Le fichier `analysis/` est l'**artefact de handoff** entre les contextes.
+L'analyse (`/dev-analyse` + `/dev-plan`) est **toujours la première étape**, quel que soit le mode.
+Le choix du mode se fait **après** l'analyse, au moment de lancer l'implémentation.
 
 ---
 
@@ -22,106 +9,92 @@ Le fichier `analysis/` est l'**artefact de handoff** entre les contextes.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  CONTEXT 1 — Analyse & Plan                                         │
+│  PHASE 1 — Analyse & Plan (toujours, dans les deux modes)           │
 │                                                                     │
 │  /dev-analyse {ticket}                                              │
 │    ├── Agent 🎯 Business    ─┐                                      │
 │    ├── Agent 🔍 Code        ─┼── (parallèle)                       │
 │    ├── Agent 🏗️ Architecture ─┤                                      │
 │    └── Agent 🔒 Sécurité   ─┘                                      │
-│         → Rapport consolidé + feu vert                             │
 │                                                                     │
 │  /dev-plan                                                          │
-│    → Découpage en tâches                                            │
-│    → Création branche + draft PR                                    │
-│    → 📄 Génère : analysis/YYYYMMDD-{slug}.md                       │
+│    → Découpage en tâches, approbation                               │
+│    → Branche créée + draft PR                                       │
+│    → 📄 analysis/YYYYMMDD-{slug}.md complété                       │
+│    → ⬇️  Choix du mode d'exécution                                  │
 └─────────────────────────────────────────────────────────────────────┘
-                          │
-                          │  📄 analysis/YYYYMMDD-{slug}.md
-                          ▼
+```
+
+En mode **orchestre**, chaque phase suivante s'exécute dans un **contexte Claude séparé** :
+
+```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  CONTEXT 2 — Implémentation                                         │
 │                                                                     │
 │  /dev-implement analysis/YYYYMMDD-{slug}.md                        │
-│    → Lit analyse + plan du fichier                                  │
-│    → Implémente tâche par tâche                                     │
-│    → Commits intermédiaires                                         │
-│    → /dev-test (scripts PHP + plan manuel)                         │
+│    → Lit le fichier d'analyse + plan                                │
+│    → Implémente tâche par tâche avec commits                        │
+│    → /dev-test  (scripts PHP + plan manuel)                        │
 └─────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
+                          ↓
 ┌─────────────────────────────────────────────────────────────────────┐
 │  CONTEXT 3 — Review du code                                         │
 │                                                                     │
 │  /dev-review                                                        │
-│    ├── Agent 📐 Qualité    ─┐                                       │
-│    ├── Agent 🐛 Bugs       ─┼── (parallèle sur git diff)           │
-│    └── Agent 🔒 Sécurité  ─┘                                       │
-│         → Rapport : bloquant / à corriger / à noter                │
+│    ├── Agent 📐 Qualité   ─┐                                        │
+│    ├── Agent 🐛 Bugs      ─┼── (parallèle sur git diff)            │
+│    └── Agent 🔒 Sécurité ─┘                                        │
+│    → Rapport : bloquant / à corriger / à noter                     │
 └─────────────────────────────────────────────────────────────────────┘
-                          │
-                          │  Rapport de review
-                          ▼
+                          ↓ rapport de review
 ┌─────────────────────────────────────────────────────────────────────┐
-│  CONTEXT 4 — Challenge de la review                                 │
+│  CONTEXT 4 — Challenge                                              │
 │                                                                     │
-│  /challenge-review (coller le rapport, ou numéro PR)               │
+│  /challenge-review                                                  │
 │    → Challenge chaque point                                         │
 │    → Verdict : valide / discutable / invalide                       │
-│    → Identifie les faux positifs                                    │
 └─────────────────────────────────────────────────────────────────────┘
-                          │
-                          ▼
-              /dev-pr → PR en ready for review
+                          ↓
+                       /dev-pr
 ```
 
 ---
 
-## Quand utiliser le mode orchestre ?
+## Pourquoi des contextes séparés ?
 
-✅ **Recommandé pour :**
-- Nouvelles features avec impact multi-fichiers
-- Tickets impliquant des zones sensibles (auth, upload, permissions)
-- Tickets où l'architecture n'est pas évidente
-- Code review important avant merge dans main
-
-❌ **Pas nécessaire pour :**
-- Corrections de typo ou de style (< 5 lignes)
-- Fixes de bugs évidents et isolés
-- Tâches de configuration / infra
+Chaque contexte repart d'une ardoise propre. Avantages :
+- L'agent d'implémentation ne traîne pas le contexte de l'analyse (fenêtre plus disponible pour le code)
+- L'agent de review lit le diff avec un œil neuf, sans biais des décisions prises en Context 2
+- L'agent de challenge n'a pas l'historique de la review, il évalue les findings de façon indépendante
 
 ---
 
-## Commandes rapides
+## Quand choisir le mode orchestre ?
+
+- Le ticket touche plusieurs fichiers dont l'impact n'est pas évident
+- La zone implique de la sécurité, des permissions, des uploads, du code partagé
+- Tu veux une review et un challenge vraiment indépendants du contexte d'implémentation
+- Le ticket est estimé Complexe par `/dev-plan`
+
+---
+
+## Commandes
 
 ```bash
-# Context 1
+# Phase 1 — toujours (Context 1 ou contexte courant)
 /dev-analyse {ticket-url-ou-texte}
 /dev-plan
 
-# Context 2 (nouveau contexte)
+# Phase 2 — nouveau contexte
 /dev-implement analysis/{slug}.md
 /dev-test
 
-# Context 3 (nouveau contexte)
+# Phase 3 — nouveau contexte
 /dev-review
 
-# Context 4 (nouveau contexte)
+# Phase 4 — nouveau contexte
 /challenge-review
 
 # Finalisation
 /dev-pr
 ```
-
----
-
-## Le fichier analysis/
-
-Ce fichier contient :
-- Rapport complet des 4 agents (business, code, architecture, sécurité)
-- Synthèse de l'orchestrateur
-- Plan d'implémentation approuvé
-- Nom de branche et lien vers la PR draft
-
-Il est créé dans le dossier `analysis/` à la racine du projet.
-Ne le commitez pas — ajoutez `analysis/` à votre `.gitignore` si vous ne souhaitez pas le versionner.
