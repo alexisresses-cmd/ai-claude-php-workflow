@@ -119,6 +119,12 @@ See [`CLAUDE.template.md`](CLAUDE.template.md) for the full template with all op
 | `dev-test` | `/dev-test` | Generates PHP test scripts (no framework) for testable logic + manual test plan. |
 | `dev-pr` | `/dev-pr` | Pushes, updates PR description, passes PR to ready for review. |
 
+### Automated cycle
+
+| Skill | Trigger | What it does |
+|-------|---------|-------------|
+| `dev-cycle` | `/dev-cycle {analysis-file}` | Chains implement → test → review automatically. Auto-corrects blocking findings (max 2 attempts). Ends with the PR ready for human review if no blockers remain. |
+
 ### Utility skills
 
 | Skill | Trigger | What it does |
@@ -169,12 +175,28 @@ See [`CLAUDE.template.md`](CLAUDE.template.md) for the full template with all op
 # → PR description updated, passed to ready for review
 ```
 
+### Automated cycle (let Claude handle it)
+
+```bash
+# After /dev-analyse + /dev-plan (Context 1)
+# → analysis/20260624-user-profile-upload.md generated
+
+/dev-cycle analysis/20260624-user-profile-upload.md
+# → Implements task by task (auto-commit)
+# → Generates test scripts + manual plan
+# → 3-agent code review
+# → If blockers found: auto-corrects and re-reviews (max 2 attempts)
+# → If clean: PR passed to ready for review ✅
+# → If still blocked after 2 attempts: HALT, manual fix required
+```
+
 ### Sequential mode (simple ticket)
 
 ```bash
 # All in one Claude Code context
-/dev-plan Fix the login session timeout bug
-/dev-implement
+/dev-analyse {ticket}
+/dev-plan
+/dev-implement analysis/{slug}.md
 /dev-test
 /dev-review
 /dev-pr
