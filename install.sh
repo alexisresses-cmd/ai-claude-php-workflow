@@ -88,7 +88,7 @@ install_file() {
 
 # Copy a directory recursively
 install_dir() {
-  local src_dir="$1"
+  local src_dir="${1%/}"
   local dst_dir="$2"
   local name="$3"
 
