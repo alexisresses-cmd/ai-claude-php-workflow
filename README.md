@@ -61,7 +61,7 @@ Context 2: /dev-implement + Gate G1   Context 3: /dev-review + Gate G2   Context
 ### Quick install (Linux / WSL / macOS)
 
 ```bash
-git clone https://github.com/your-username/ai-claude-php-workflow.git
+git clone https://github.com/alexisresses-cmd/ai-claude-php-workflow.git
 cd ai-claude-php-workflow
 chmod +x install.sh
 ./install.sh
