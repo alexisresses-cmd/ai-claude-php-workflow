@@ -2,9 +2,9 @@
 
 ## Dépôt local
 
-- **Chemin** : `C:\Users\ALE.RESSES\Documents\Perso\Claude`
-- **Branche** : `master`
-- **Commits** : 6 commits prêts à pousser
+- **Chemin** : `/Users/alexis/Downloads/Claude`
+- **Branche** : `main`
+- **Remote** : `git@github.com:alexisresses-cmd/ai-claude-php-workflow.git`
 
 ---
 
@@ -32,7 +32,7 @@ cd "C:\Users\ALE.RESSES\Documents\Perso\Claude"
 # Depuis WSL
 cd /mnt/c/Users/ALE.RESSES/Documents/Perso/Claude
 
-git remote add origin https://github.com/{ton-username}/ai-claude-php-workflow.git
+git remote add origin git@github.com:alexisresses-cmd/ai-claude-php-workflow.git
 git branch -M main
 git push -u origin main
 ```
@@ -88,7 +88,7 @@ Pull + réinstallation en une commande. Sort sans rien faire si déjà à jour.
 ## Installer la config sur un poste
 
 ```bash
-git clone https://github.com/{ton-username}/ai-claude-php-workflow.git
+git clone https://github.com/alexisresses-cmd/ai-claude-php-workflow.git
 cd ai-claude-php-workflow
 chmod +x install.sh
 ./install.sh
