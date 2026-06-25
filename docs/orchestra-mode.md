@@ -26,7 +26,8 @@ Le choix du mode se fait **après** l'analyse, au moment de lancer l'implémenta
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-En mode **orchestre**, chaque phase suivante s'exécute dans un **contexte Claude séparé** :
+En mode **orchestre**, chaque phase suivante s'exécute dans un **contexte Claude séparé**.
+Chaque contexte contient sa propre boucle de correction automatique (max 2 tentatives).
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -36,8 +37,16 @@ En mode **orchestre**, chaque phase suivante s'exécute dans un **contexte Claud
 │    → Lit le fichier d'analyse + plan                                │
 │    → Implémente tâche par tâche avec commits                        │
 │    → /dev-test  (scripts PHP + plan manuel)                        │
+│                                                                     │
+│  ┌── GATE G1 ────────────────────────────────────────────────┐     │
+│  │  all_tasks_covered · working_tree_clean · no_debug_code   │     │
+│  │  no_new_todos · conventions_respected · commits_format    │     │
+│  │                                                           │     │
+│  │  FAIL → agent correctif → re-check (max 2x)              │     │
+│  └───────────────────────────────────────────────────────────┘     │
+│    ✅ PRÊT POUR CONTEXT 3  |  🛑 HALT — correction manuelle        │
 └─────────────────────────────────────────────────────────────────────┘
-                          ↓
+                          ↓ (transition manuelle)
 ┌─────────────────────────────────────────────────────────────────────┐
 │  CONTEXT 3 — Review du code                                         │
 │                                                                     │
@@ -46,8 +55,15 @@ En mode **orchestre**, chaque phase suivante s'exécute dans un **contexte Claud
 │    ├── Agent 🐛 Bugs      ─┼── (parallèle sur git diff)            │
 │    └── Agent 🔒 Sécurité ─┘                                        │
 │    → Rapport : bloquant / à corriger / à noter                     │
+│                                                                     │
+│  ┌── GATE G2 ────────────────────────────────────────────────┐     │
+│  │  findings_blocking = []                                   │     │
+│  │                                                           │     │
+│  │  FAIL → agent correctif → re-review (max 2x)             │     │
+│  └───────────────────────────────────────────────────────────┘     │
+│    ✅ PRÊT POUR CONTEXT 4  |  🛑 HALT — correction manuelle        │
 └─────────────────────────────────────────────────────────────────────┘
-                          ↓ rapport de review
+                          ↓ rapport de review (transition manuelle)
 ┌─────────────────────────────────────────────────────────────────────┐
 │  CONTEXT 4 — Challenge                                              │
 │                                                                     │

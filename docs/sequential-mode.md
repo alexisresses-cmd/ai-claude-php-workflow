@@ -47,7 +47,7 @@ En mode **séquentiel**, toutes les phases suivantes s'enchaînent dans le **mê
 |---|---|---|---|
 | **Analyse** | Identique — 4 agents en parallèle | Identique | Identique |
 | **Exécution** | Automatisée | Manuelle, même contexte | Manuelle, contextes séparés |
-| **Correction** | Auto (max 2x) | Manuelle | Manuelle |
+| **Correction** | Auto (max 2x) | Manuelle | Auto dans chaque contexte (max 2x) |
 | **Challenge** | Intégré dans la boucle | Optionnel | Contexte dédié |
 | **PR** | Auto à la fin | Manuelle | Manuelle |
 | **Recommandé si** | Simple/Moyenne, pas de risque sécu | Moyenne, contrôle souhaité | Complexe ou zone sensible |

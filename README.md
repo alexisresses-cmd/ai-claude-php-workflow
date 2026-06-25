@@ -37,10 +37,10 @@ After the analysis, choose the mode that fits the ticket:
 /dev-implement → /dev-test → /dev-review → /dev-pr  (same context)
 ```
 
-**Orchestra** — Dedicated context per phase. For complex tickets, security-sensitive areas, or when you want a fresh-eyes review.
+**Orchestra** — Dedicated context per phase. For complex tickets, security-sensitive areas, or when you want a fresh-eyes review. Each context has its own auto-correction loop (max 2 attempts) before signalling readiness for the next context.
 
 ```
-Context 2: /dev-implement   Context 3: /dev-review   Context 4: /challenge-review → /dev-pr
+Context 2: /dev-implement + Gate G1   Context 3: /dev-review + Gate G2   Context 4: /challenge-review → /dev-pr
 ```
 
 ---
@@ -129,9 +129,9 @@ See [`CLAUDE.template.md`](CLAUDE.template.md) for the full template with all op
 | Skill | Trigger | Mode | What it does |
 |-------|---------|------|-------------|
 | `dev-cycle` | `/dev-cycle {analysis-file}` | Automated | Chains implement → test → review. Auto-corrects blocking findings (max 2 attempts). Ends with PR ready for review. |
-| `dev-implement` | `/dev-implement {analysis-file}` | Sequential / Orchestra | Implements the approved plan task by task with commits. Applies clean code and SOLID principles. |
+| `dev-implement` | `/dev-implement {analysis-file}` | Sequential / Orchestra | Implements the approved plan task by task with commits. Applies clean code and SOLID principles. **Gate G1** runs at the end: auto-corrects failing criteria (max 2 attempts), then signals `✅ Ready for Context 3` or `🛑 HALT`. |
 | `dev-test` | `/dev-test` | Sequential / Orchestra | Generates PHP test scripts (no framework) for testable logic + manual test plan. |
-| `dev-review` | `/dev-review` | Sequential / Orchestra | Spawns 3 agents in parallel (quality, bugs, security) on the full diff. |
+| `dev-review` | `/dev-review` | Sequential / Orchestra | Spawns 3 agents in parallel (quality, bugs, security) on the full diff. **Gate G2** runs after the report: if blocking findings, auto-corrects and re-reviews (max 2 attempts), then signals `✅ Ready for Context 4` or `🛑 HALT`. |
 | `challenge-review` | `/challenge-review` | Orchestra | Challenges every review finding. Delivers a verdict table (valid / debatable / invalid). |
 | `dev-pr` | `/dev-pr` | Sequential / Orchestra | Pushes, updates PR description, passes PR to ready for review. |
 
@@ -193,9 +193,15 @@ See [`CLAUDE.template.md`](CLAUDE.template.md) for the full template with all op
 # Context 2 — new Claude Code context
 /dev-implement analysis/20260624-user-profile-upload.md
 /dev-test
+# → Gate G1 runs automatically at the end
+# → If criteria fail: auto-corrects and re-checks (max 2 attempts)
+# → ✅ READY FOR CONTEXT 3  |  🛑 HALT (manual fix required)
 
 # Context 3 — new context
 /dev-review
+# → Gate G2 runs automatically after the report
+# → If blocking findings: auto-corrects and re-reviews (max 2 attempts)
+# → ✅ READY FOR CONTEXT 4  |  🛑 HALT (manual fix required)
 
 # Context 4 — new context
 /challenge-review

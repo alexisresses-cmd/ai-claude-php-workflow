@@ -133,6 +133,8 @@ feat(scope): #{id} description courte
 
 ### Mode interactif
 
+Affiche le bilan intermédiaire :
+
 ```
 ✅ Implémentation terminée
 
@@ -145,10 +147,9 @@ Tâches réalisées :
 
 Points d'attention pour la review :
   [Ce qui mérite une attention particulière]
-
-Prochaine étape :
-  Context 3 → /dev-review
 ```
+
+Puis passe directement à l'**Étape 4** (Gate G1).
 
 ### Mode orchestrateur
 
@@ -174,6 +175,106 @@ Retourne **uniquement** le bilan structuré suivant (JSON) :
 ```
 
 Évalue chaque critère honnêtement.
+
+---
+
+## Étape 4 — Gate G1 (mode interactif uniquement)
+
+> **En mode orchestrateur, cette étape est ignorée.** Le gate est géré par dev-cycle.
+
+### Critères du gate
+
+```
+GATE G1
+  ┌─────────────────────────────────────────────────────────┐
+  │  all_tasks_covered        → toutes les tâches du plan   │
+  │  working_tree_clean       → git status propre           │
+  │  no_debug_code            → pas de var_dump, dd(), etc. │
+  │  no_new_todos             → pas de TODO non assumés     │
+  │  conventions_respected    → PSR-12, conventions CLAUDE  │
+  │  commits_format           → format respecté             │
+  │  no_out_of_scope_files    → pas de fichiers hors plan   │
+  └─────────────────────────────────────────────────────────┘
+```
+
+Évalue chaque critère. Si tous sont ✅ → gate PASS directement.
+
+### Protocole de correction (si un critère échoue)
+
+**Compteur d'essais : max 2 corrections automatiques.**
+
+Pour chaque cycle :
+
+1. Spawn un agent de correction avec ces instructions :
+   ```
+   Tu es un développeur correctif.
+   Voici les critères en échec après l'implémentation :
+
+   {liste des critères KO avec détail}
+
+   Ta mission :
+   - Corriger chacun de ces points dans le code
+   - Ne rien modifier hors de ces corrections
+   - Committer : fix(scope): gate G1 — {description courte}
+   - Retourner la liste des corrections effectuées
+   ```
+
+2. Réévaluer les critères.
+
+Si le gate repasse ✅ → continuer.
+Si le gate échoue encore et que le compteur est épuisé → HALT.
+
+### Signal final
+
+**Gate G1 ✅** :
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ GATE G1 — PASS
+
+   all_tasks_covered        ✅
+   working_tree_clean       ✅
+   no_debug_code            ✅
+   no_new_todos             ✅
+   conventions_respected    ✅
+   commits_format           ✅
+   no_out_of_scope_files    ✅
+
+➡️  PRÊT POUR CONTEXT 3
+    Dans un nouveau contexte Claude Code :
+    /dev-review
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Gate G1 ✅ après correction(s)** :
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ GATE G1 — PASS (après {N} correction(s) automatique(s))
+   Corrections appliquées :
+     • {correction 1}
+
+➡️  PRÊT POUR CONTEXT 3
+    Dans un nouveau contexte Claude Code :
+    /dev-review
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**Gate G1 ❌ (2 tentatives épuisées)** :
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🛑 GATE G1 — HALT
+   Les critères suivants sont toujours en échec
+   après 2 tentatives de correction automatique :
+
+     ❌ {critère 1} — {détail}
+     ❌ {critère 2} — {détail}
+
+   Action requise : corriger manuellement ces points
+   dans ce contexte avant de passer en Context 3.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
 
 ---
 
