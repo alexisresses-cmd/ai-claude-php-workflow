@@ -79,6 +79,18 @@ The installer is **non-destructive by default** — it skips any files that alre
 Your existing skills, commands, and settings are preserved.
 Use `--force` only if you want to update to the latest version.
 
+### Updating
+
+When a new version is published, run:
+
+```bash
+./update.sh
+```
+
+This pulls the latest changes from `origin/main` and reinstalls the config automatically (`--force`).
+If you are already up to date, the script exits without doing anything.
+Existing files are backed up as `.bak` before being overwritten.
+
 ### Manual install
 
 Copy the relevant directories to your `~/.claude/` folder:
