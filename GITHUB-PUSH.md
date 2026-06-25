@@ -4,7 +4,7 @@
 
 - **Chemin** : `C:\Users\ALE.RESSES\Documents\Perso\Claude`
 - **Branche** : `master`
-- **Commits** : 3 commits prêts à pousser
+- **Commits** : 5 commits prêts à pousser
 
 ---
 
@@ -57,12 +57,12 @@ ai-claude-php-workflow/
 │   ├── _shared/
 │   │   ├── clean-code.md
 │   │   └── php-conventions.md
-│   ├── dev-analyse/            ← 4 agents parallèles
-│   ├── dev-plan/               ← 3 agents + branche + PR draft
+│   ├── dev-analyse/            ← Phase 1 : 4 agents parallèles
+│   ├── dev-plan/               ← Phase 1 : plan + recommandation du mode
+│   ├── dev-cycle/              ← Automatisé : implement→test→review → PR
 │   ├── dev-implement/
 │   ├── dev-test/
 │   ├── dev-review/             ← 3 agents parallèles
-│   ├── dev-cycle/              ← implement→test→review en boucle → PR auto
 │   ├── dev-pr/
 │   ├── challenge-review/
 │   └── review-return/
@@ -103,26 +103,24 @@ cp CLAUDE.template.md /chemin/vers/projet/CLAUDE.md
 ## Workflow
 
 ```
-# Toujours en premier (dans les deux modes)
+# Phase 1 — toujours obligatoire
 /dev-analyse {ticket-url-ou-texte}
 /dev-plan
 # → Génère : analysis/YYYYMMDD-{slug}.md
-# → Propose le choix du mode à la fin
+# → Affiche une recommandation de mode ⭐
 
-# Mode automatisé — dev-cycle (même contexte)
+# Mode automatisé — dev-cycle
 /dev-cycle analysis/{slug}.md
-# → implement → test → review (boucle correction si bloquants, max 2x)
-# → PR ready for review ✅
+# → implement → test → review (boucle correction max 2x) → PR ready ✅
 
-# Mode séquentiel (même contexte, contrôle manuel)
+# Mode séquentiel (contrôle manuel, même contexte)
 /dev-implement analysis/{slug}.md
 /dev-test
 /dev-review
 /dev-pr
 
 # Mode orchestre (contexte dédié par phase)
-# Context 2 → /dev-implement analysis/{slug}.md
+# Context 2 → /dev-implement analysis/{slug}.md + /dev-test
 # Context 3 → /dev-review
-# Context 4 → /challenge-review
-#           → /dev-pr
+# Context 4 → /challenge-review → /dev-pr
 ```

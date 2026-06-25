@@ -9,7 +9,7 @@ Le choix du mode se fait **après** l'analyse, au moment de lancer l'implémenta
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 1 — Analyse & Plan (toujours, dans les deux modes)           │
+│  PHASE 1 — Analyse & Plan (toujours, dans les trois modes)           │
 │                                                                     │
 │  /dev-analyse {ticket}                                              │
 │    ├── Agent 🎯 Business    ─┐                                      │
@@ -21,6 +21,7 @@ Le choix du mode se fait **après** l'analyse, au moment de lancer l'implémenta
 │    → Découpage en tâches, approbation                               │
 │    → Branche créée + draft PR                                       │
 │    → 📄 analysis/YYYYMMDD-{slug}.md complété                       │
+│    → ⭐ Recommandation du mode selon complexité + risque sécu        │
 │    → ⬇️  Choix du mode d'exécution                                  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -71,10 +72,11 @@ Chaque contexte repart d'une ardoise propre. Avantages :
 
 ## Quand choisir le mode orchestre ?
 
-- Le ticket touche plusieurs fichiers dont l'impact n'est pas évident
-- La zone implique de la sécurité, des permissions, des uploads, du code partagé
-- Tu veux une review et un challenge vraiment indépendants du contexte d'implémentation
-- Le ticket est estimé Complexe par `/dev-plan`
+`/dev-plan` le recommande automatiquement (⭐) quand :
+- Complexité = **Complexe**
+- Risque sécurité 🔴 ou 🟠 détecté dans l'analyse
+- Code partagé impacté (lib commune, interface publique)
+- Plus de 5 fichiers modifiés
 
 ---
 

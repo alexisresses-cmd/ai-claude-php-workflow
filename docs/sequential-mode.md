@@ -9,7 +9,7 @@ Le choix du mode se fait **après** l'analyse, au moment de lancer l'implémenta
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  PHASE 1 — Analyse & Plan (toujours, dans les deux modes)           │
+│  PHASE 1 — Analyse & Plan (toujours, dans les trois modes)           │
 │                                                                     │
 │  /dev-analyse {ticket}                                              │
 │    ├── Agent 🎯 Business    ─┐                                      │
@@ -21,6 +21,7 @@ Le choix du mode se fait **après** l'analyse, au moment de lancer l'implémenta
 │    → Découpage en tâches, approbation                               │
 │    → Branche créée + draft PR                                       │
 │    → 📄 analysis/YYYYMMDD-{slug}.md complété                       │
+│    → ⭐ Recommandation du mode selon complexité + risque sécu        │
 │    → ⬇️  Choix du mode d'exécution                                  │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -40,24 +41,24 @@ En mode **séquentiel**, toutes les phases suivantes s'enchaînent dans le **mê
 
 ---
 
-## Différences avec le mode orchestre
+## Comparaison des trois modes
 
-| | Séquentiel | Orchestre |
-|---|---|---|
-| **Analyse** | Identique — 4 agents en parallèle | Identique — 4 agents en parallèle |
-| **Contextes** | 1 seul après l'analyse | 1 par phase (implement / review / challenge) |
-| **Review** | 3 agents, même contexte que l'implémentation | 3 agents, contexte propre |
-| **Challenge** | Optionnel, même contexte | Contexte dédié, regard neuf |
-| **Quand** | Ticket simple ou bien cerné | Ticket complexe ou risqué |
+| | dev-cycle | Séquentiel | Orchestre |
+|---|---|---|---|
+| **Analyse** | Identique — 4 agents en parallèle | Identique | Identique |
+| **Exécution** | Automatisée | Manuelle, même contexte | Manuelle, contextes séparés |
+| **Correction** | Auto (max 2x) | Manuelle | Manuelle |
+| **Challenge** | Intégré dans la boucle | Optionnel | Contexte dédié |
+| **PR** | Auto à la fin | Manuelle | Manuelle |
+| **Recommandé si** | Simple/Moyenne, pas de risque sécu | Moyenne, contrôle souhaité | Complexe ou zone sensible |
 
 ---
 
 ## Quand choisir le mode séquentiel ?
 
-- Bug isolé avec cause claire
+- Ticket estimé Moyenne par `/dev-plan` avec un risque sécu faible
+- Tu veux valider chaque étape manuellement sans changer de contexte
 - Feature sur 1-3 fichiers que tu connais bien
-- Ticket estimé Simple ou Moyenne par `/dev-plan`
-- Tu préfères itérer rapidement sans changer de contexte
 
 ---
 

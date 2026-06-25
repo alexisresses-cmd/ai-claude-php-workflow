@@ -1,6 +1,6 @@
 # AI Claude PHP Workflow
 
-> Claude Code configuration for PHP developers — clean code, SOLID principles, two-mode workflow.
+> Claude Code configuration for PHP developers — clean code, SOLID principles, three-mode workflow.
 
 A ready-to-use [Claude Code](https://claude.ai/code) configuration designed for PHP development.
 It provides a structured skill suite covering the full development cycle, from ticket analysis to pull request submission.
@@ -9,23 +9,38 @@ It provides a structured skill suite covering the full development cycle, from t
 
 ## Overview
 
-### Two modes, one workflow
+### Always start with analysis
 
-**Orchestra mode** — For complex tickets requiring deep analysis before coding.
-Four agents work in parallel across four separate Claude contexts:
-
-```
-Context 1: /dev-analyse + /dev-plan  →  analysis/YYYYMMDD-{slug}.md
-Context 2: /dev-implement            →  Code written and committed
-Context 3: /dev-review               →  Multi-agent code review
-Context 4: /challenge-review         →  Review findings challenged
-                                     →  /dev-pr — PR ready for review
-```
-
-**Sequential mode** — For simple to medium tickets, all in a single context:
+`/dev-analyse` + `/dev-plan` are **mandatory in all modes**. They spawn agents in parallel, produce a structured analysis file, and recommend the best execution mode based on complexity and security risk.
 
 ```
-/dev-plan → /dev-implement → /dev-test → /dev-review → /dev-pr
+/dev-analyse {ticket}  →  4 agents in parallel (business, code, architecture, security)
+/dev-plan              →  Task breakdown + branch + draft PR + analysis/YYYYMMDD-{slug}.md
+                              ↓
+                    ⭐ Mode recommendation
+```
+
+### Three execution modes
+
+After the analysis, choose the mode that fits the ticket:
+
+**Automated — `dev-cycle`** — Claude handles everything. Recommended for simple/medium tickets with no security risk.
+
+```
+/dev-cycle analysis/{slug}.md
+→ implement → test → review (auto-corrects blockers, max 2 attempts) → PR ready ✅
+```
+
+**Sequential** — Manual control, single context. For medium tickets where you want to validate each step.
+
+```
+/dev-implement → /dev-test → /dev-review → /dev-pr  (same context)
+```
+
+**Orchestra** — Dedicated context per phase. For complex tickets, security-sensitive areas, or when you want a fresh-eyes review.
+
+```
+Context 2: /dev-implement   Context 3: /dev-review   Context 4: /challenge-review → /dev-pr
 ```
 
 ---
@@ -102,34 +117,29 @@ See [`CLAUDE.template.md`](CLAUDE.template.md) for the full template with all op
 
 ## Skills reference
 
-### Orchestra mode skills
+### Phase 1 — Always (all modes)
 
 | Skill | Trigger | What it does |
 |-------|---------|-------------|
-| `dev-analyse` | `/dev-analyse {ticket}` | Spawns 4 agents in parallel (business, code, architecture, security). Generates `analysis/` file. |
-| `dev-plan` | `/dev-plan` | Transforms analysis into a task breakdown. Creates branch and draft PR. Completes the analysis file. |
-| `dev-review` | `/dev-review` | Spawns 3 agents in parallel (quality, bugs, security) on the full diff. |
-| `challenge-review` | `/challenge-review` | Challenges every review finding. Delivers a verdict table (valid / debatable / invalid). |
+| `dev-analyse` | `/dev-analyse {ticket}` | Spawns 4 agents in parallel (business, code, architecture, security). Accepts GitHub Issues URL, Trello URL, or plain text. Generates `analysis/` file. |
+| `dev-plan` | `/dev-plan` | Transforms analysis into a task breakdown. Creates branch and draft PR. Completes the analysis file. **Recommends the best execution mode** based on complexity and security risk. |
 
-### Sequential mode skills
+### Phase 2 — Execution (choose one mode)
 
-| Skill | Trigger | What it does |
-|-------|---------|-------------|
-| `dev-implement` | `/dev-implement {analysis-file}` | Implements the approved plan task by task. Applies clean code and SOLID principles. |
-| `dev-test` | `/dev-test` | Generates PHP test scripts (no framework) for testable logic + manual test plan. |
-| `dev-pr` | `/dev-pr` | Pushes, updates PR description, passes PR to ready for review. |
-
-### Automated cycle
-
-| Skill | Trigger | What it does |
-|-------|---------|-------------|
-| `dev-cycle` | `/dev-cycle {analysis-file}` | Chains implement → test → review automatically. Auto-corrects blocking findings (max 2 attempts). Ends with the PR ready for human review if no blockers remain. |
+| Skill | Trigger | Mode | What it does |
+|-------|---------|------|-------------|
+| `dev-cycle` | `/dev-cycle {analysis-file}` | Automated | Chains implement → test → review. Auto-corrects blocking findings (max 2 attempts). Ends with PR ready for review. |
+| `dev-implement` | `/dev-implement {analysis-file}` | Sequential / Orchestra | Implements the approved plan task by task with commits. Applies clean code and SOLID principles. |
+| `dev-test` | `/dev-test` | Sequential / Orchestra | Generates PHP test scripts (no framework) for testable logic + manual test plan. |
+| `dev-review` | `/dev-review` | Sequential / Orchestra | Spawns 3 agents in parallel (quality, bugs, security) on the full diff. |
+| `challenge-review` | `/challenge-review` | Orchestra | Challenges every review finding. Delivers a verdict table (valid / debatable / invalid). |
+| `dev-pr` | `/dev-pr` | Sequential / Orchestra | Pushes, updates PR description, passes PR to ready for review. |
 
 ### Utility skills
 
 | Skill | Trigger | What it does |
 |-------|---------|-------------|
-| `review-return` | `/review-return {pr}` | Handles PR review feedback from the main reviewer. Challenges each comment, applies valid corrections, drafts responses. |
+| `review-return` | `/review-return {pr}` | Handles PR review feedback from the configured `MAIN_REVIEWER`. Challenges each comment, applies valid corrections, drafts ready-to-post responses. |
 
 ### Commands
 
@@ -142,72 +152,61 @@ See [`CLAUDE.template.md`](CLAUDE.template.md) for the full template with all op
 
 ## Workflow in practice
 
-### Orchestra mode (complex ticket)
+### Phase 1 — Always run first
 
 ```bash
-# Context 1 — Analysis & planning
-# In Claude Code, with your project open
+# Accepts: GitHub Issues URL, Trello URL, or pasted text
 /dev-analyse https://github.com/owner/repo/issues/42
-# → Agents run in parallel, report generated
 /dev-plan
-# → Approve the task breakdown
+# → Task breakdown presented for approval
 # → Branch created: feat/42-user-profile-upload
 # → Draft PR created
 # → File generated: analysis/20260624-user-profile-upload.md
-
-# Context 2 — Implementation (open a new Claude Code context)
-/dev-implement analysis/20260624-user-profile-upload.md
-# → Implements task by task with commits
-/dev-test
-# → Test scripts + manual test plan
-
-# Context 3 — Code review (new context)
-/dev-review
-# → 3 agents review the full diff in parallel
-
-# Context 4 — Challenge review findings (new context)
-/challenge-review
-# → Paste the review report or provide the PR number
-# → Each finding challenged: valid / debatable / invalid
-
-# Finalize
-/dev-pr
-# → PR description updated, passed to ready for review
+# → ⭐ Mode recommendation displayed
 ```
 
-### Automated cycle (let Claude handle it)
+### Automated mode (dev-cycle)
 
 ```bash
-# After /dev-analyse + /dev-plan (Context 1)
-# → analysis/20260624-user-profile-upload.md generated
-
 /dev-cycle analysis/20260624-user-profile-upload.md
 # → Implements task by task (auto-commit)
 # → Generates test scripts + manual plan
 # → 3-agent code review
-# → If blockers found: auto-corrects and re-reviews (max 2 attempts)
-# → If clean: PR passed to ready for review ✅
-# → If still blocked after 2 attempts: HALT, manual fix required
+# → If blockers: auto-corrects and re-reviews (max 2 attempts)
+# → If clean: PR ready for review ✅
+# → If still blocked: HALT, manual fix required
 ```
 
-### Sequential mode (simple ticket)
+### Sequential mode
 
 ```bash
 # All in one Claude Code context
-/dev-analyse {ticket}
-/dev-plan
-/dev-implement analysis/{slug}.md
+/dev-implement analysis/20260624-user-profile-upload.md
 /dev-test
 /dev-review
+/dev-pr
+```
+
+### Orchestra mode
+
+```bash
+# Context 2 — new Claude Code context
+/dev-implement analysis/20260624-user-profile-upload.md
+/dev-test
+
+# Context 3 — new context
+/dev-review
+
+# Context 4 — new context
+/challenge-review
 /dev-pr
 ```
 
 ### Handle incoming PR feedback
 
 ```bash
-# After a reviewer comments on your PR
 /review-return 42
-# → Fetches comments from the configured MAIN_REVIEWER
+# → Fetches comments from MAIN_REVIEWER (configured in CLAUDE.md)
 # → Challenges each comment
 # → Applies valid corrections
 # → Drafts ready-to-post responses
@@ -229,22 +228,22 @@ Project-specific conventions are documented in each project's `CLAUDE.md`.
 ## Structure
 
 ```
-claude-php-dev/
+ai-claude-php-workflow/
 ├── README.md
 ├── CLAUDE.template.md          ← Copy to each project as CLAUDE.md
 ├── settings.json               ← Claude Code settings (merged, not replaced)
 ├── install.sh                  ← Non-destructive installer
 │
-├── commands/                   ← Slash commands
+├── commands/
 │   ├── dev-branch.md
 │   └── dev-commit.md
 │
 ├── skills/
-│   ├── _shared/                ← Shared references across skills
+│   ├── _shared/                ← Shared references injected into agents
 │   │   ├── clean-code.md
 │   │   └── php-conventions.md
 │   │
-│   ├── dev-analyse/            ← Orchestra: ticket analysis
+│   ├── dev-analyse/            ← Phase 1: 4-agent parallel analysis
 │   │   ├── SKILL.md
 │   │   └── agents/
 │   │       ├── business.md
@@ -252,14 +251,17 @@ claude-php-dev/
 │   │       ├── architecture.md
 │   │       └── security.md
 │   │
-│   ├── dev-plan/               ← Planning + branch/PR creation
+│   ├── dev-plan/               ← Phase 1: task breakdown + mode recommendation
 │   │   ├── SKILL.md
 │   │   └── agents/
 │   │       ├── architect.md
 │   │       ├── challenger.md
 │   │       └── developer.md
 │   │
-│   ├── dev-implement/          ← Task-by-task implementation
+│   ├── dev-cycle/              ← Automated: implement→test→review loop → PR
+│   │   └── SKILL.md
+│   │
+│   ├── dev-implement/          ← Sequential/Orchestra: task-by-task implementation
 │   │   └── SKILL.md
 │   │
 │   ├── dev-test/               ← PHP test scripts + manual test plan
@@ -267,7 +269,7 @@ claude-php-dev/
 │   │   └── references/
 │   │       └── php-test-patterns.md
 │   │
-│   ├── dev-review/             ← Orchestra: multi-agent code review
+│   ├── dev-review/             ← 3-agent parallel code review
 │   │   ├── SKILL.md
 │   │   └── agents/
 │   │       ├── bugs.md
@@ -277,7 +279,7 @@ claude-php-dev/
 │   ├── dev-pr/                 ← PR finalization
 │   │   └── SKILL.md
 │   │
-│   ├── challenge-review/       ← Challenge review findings
+│   ├── challenge-review/       ← Orchestra: challenge review findings
 │   │   ├── SKILL.md
 │   │   └── references/
 │   │       ├── grille-analyse.md
@@ -287,15 +289,15 @@ claude-php-dev/
 │       └── SKILL.md
 │
 └── docs/
-    ├── orchestra-mode.md       ← Orchestra mode detailed guide
-    └── sequential-mode.md      ← Sequential mode reference
+    ├── orchestra-mode.md
+    └── sequential-mode.md
 ```
 
 ---
 
 ## Contributing
 
-Skills are plain Markdown files — they're easy to read, fork, and adapt.
+Skills are plain Markdown files — easy to read, fork, and adapt.
 
 To adapt for your team:
 1. Fork the repo
