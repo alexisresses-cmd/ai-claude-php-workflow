@@ -184,7 +184,8 @@ create_structure() {
   for dir in \
     "$CLAUDE_DIR" \
     "$CLAUDE_DIR/skills" \
-    "$CLAUDE_DIR/commands"; do
+    "$CLAUDE_DIR/commands" \
+    "$CLAUDE_DIR/workflows"; do
     if mkdir -p "$dir" 2>/dev/null; then
       : # silent
     fi
@@ -214,7 +215,25 @@ install_skills() {
   done
 }
 
-# ─── Step 4: Install commands ─────────────────────────────────────────────────
+# ─── Step 4: Install workflow scripts ─────────────────────────────────────────
+install_workflows() {
+  echo ""
+  echo -e "${BOLD}Step 4 — Workflow scripts${NC}"
+
+  local workflows_dst="$CLAUDE_DIR/workflows"
+
+  # Extract workflow.js files from skill directories and install them as named workflows
+  for skill_dir in "$SCRIPT_DIR/skills"/*/; do
+    local skill_name
+    skill_name=$(basename "$skill_dir")
+    local workflow_src="$skill_dir/workflow.js"
+    if [[ -f "$workflow_src" ]]; then
+      install_file "$workflow_src" "$workflows_dst/${skill_name}.js"
+    fi
+  done
+}
+
+# ─── Step 5: Install commands ─────────────────────────────────────────────────
 install_commands() {
   echo ""
   echo -e "${BOLD}Step 4 — Commands${NC}"
@@ -233,17 +252,17 @@ install_commands() {
   done
 }
 
-# ─── Step 5: Merge settings ───────────────────────────────────────────────────
+# ─── Step 6: Merge settings ───────────────────────────────────────────────────
 install_settings() {
   echo ""
-  echo -e "${BOLD}Step 5 — Settings${NC}"
+  echo -e "${BOLD}Step 6 — Settings${NC}"
   merge_settings
 }
 
-# ─── Step 6: Verify dependencies ──────────────────────────────────────────────
+# ─── Step 7: Verify dependencies ──────────────────────────────────────────────
 check_dependencies() {
   echo ""
-  echo -e "${BOLD}Step 6 — Dependencies check${NC}"
+  echo -e "${BOLD}Step 7 — Dependencies check${NC}"
 
   # Claude Code CLI
   if command -v claude &>/dev/null; then
@@ -324,6 +343,7 @@ fi
 install_cli
 create_structure
 install_skills
+install_workflows
 install_commands
 install_settings
 check_dependencies
