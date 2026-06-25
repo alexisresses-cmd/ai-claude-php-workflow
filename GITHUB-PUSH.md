@@ -4,7 +4,7 @@
 
 - **Chemin** : `C:\Users\ALE.RESSES\Documents\Perso\Claude`
 - **Branche** : `master`
-- **Commits** : 5 commits prêts à pousser
+- **Commits** : 6 commits prêts à pousser
 
 ---
 
@@ -74,6 +74,17 @@ ai-claude-php-workflow/
 
 ---
 
+## Mettre à jour la config
+
+```bash
+cd ai-claude-php-workflow
+./update.sh
+```
+
+Pull + réinstallation en une commande. Sort sans rien faire si déjà à jour.
+
+---
+
 ## Installer la config sur un poste
 
 ```bash
@@ -119,8 +130,10 @@ cp CLAUDE.template.md /chemin/vers/projet/CLAUDE.md
 /dev-review
 /dev-pr
 
-# Mode orchestre (contexte dédié par phase)
+# Mode orchestre (contexte dédié par phase, gates automatiques)
 # Context 2 → /dev-implement analysis/{slug}.md + /dev-test
+#             Gate G1 auto (max 2x) → ✅ Prêt Context 3 | 🛑 HALT
 # Context 3 → /dev-review
+#             Gate G2 auto (max 2x) → ✅ Prêt Context 4 | 🛑 HALT
 # Context 4 → /challenge-review → /dev-pr
 ```
